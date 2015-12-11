@@ -15,8 +15,10 @@ https://www.python.org/ftp/python/2.7.11/python-2.7.11.msi
 >Gestion de l'authentification par password
 >Gestion des clefs SSH publiques
 
+SFTP, script command, tunneling de connection, sshd -d
+
 #### Diagramme
-![Image of the diagram of the project](https://octodex.github.com/images/yaktocat.png)
+![Image of the diagram of the project](http://image.noelshack.com/fichiers/2015/50/1449840981-diag.png)
 
 ## Informations
 Les liens suivants pourront vous être utile:

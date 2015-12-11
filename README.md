@@ -7,9 +7,16 @@ https://www.python.org/ftp/python/2.7.11/python-2.7.11.msi
 * pip install paramiko
 
 ### Etape 1
-Créer un client SSH qui génère une connexion vers un serveur SSH en asymétrique
-Passer d'une connexion asymétrique à symétrique
+>Créer un client SSH qui génère une connexion vers un serveur SSH en asymétrique
+>Passer d'une connexion asymétrique à symétrique
 
+### Etape 2
+>Créer un PAM
+>Gestion de l'authentification par password
+>Gestion des clefs SSH publiques
+
+#### Diagramme
+![Image of the diagram of the project](https://octodex.github.com/images/yaktocat.png)
 
 ## Informations
 Les liens suivants pourront vous être utile:

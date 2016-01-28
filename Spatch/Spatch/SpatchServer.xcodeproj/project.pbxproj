@@ -10,6 +10,7 @@
 		7A23F2481C50160600971AB8 /* SPTServGuestTalk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A23F2461C50160600971AB8 /* SPTServGuestTalk.cpp */; };
 		7A5DDF611C4C0D3700A81DBB /* SPTServ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A5DDF5F1C4C0D3700A81DBB /* SPTServ.cpp */; };
 		7A7BB76A1C4C443F00187763 /* SPTServGuest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A7BB7681C4C443F00187763 /* SPTServGuest.cpp */; };
+		7A7E966E1C5A4655001772E5 /* SPTHostConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A7E966C1C5A4655001772E5 /* SPTHostConnection.cpp */; };
 		7A9363EC1C4926A600E304D3 /* libssh.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A9363EB1C4926A600E304D3 /* libssh.dylib */; };
 		7A9363F81C4A4E2100E304D3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A9363F71C4A4E2100E304D3 /* main.cpp */; };
 /* End PBXBuildFile section */
@@ -33,11 +34,11 @@
 		7A5DDF601C4C0D3700A81DBB /* SPTServ.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SPTServ.hpp; sourceTree = "<group>"; };
 		7A7BB7681C4C443F00187763 /* SPTServGuest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SPTServGuest.cpp; sourceTree = "<group>"; };
 		7A7BB7691C4C443F00187763 /* SPTServGuest.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SPTServGuest.hpp; sourceTree = "<group>"; };
+		7A7E966C1C5A4655001772E5 /* SPTHostConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SPTHostConnection.cpp; sourceTree = "<group>"; };
+		7A7E966D1C5A4655001772E5 /* SPTHostConnection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SPTHostConnection.hpp; sourceTree = "<group>"; };
 		7A9363DF1C491FEE00E304D3 /* SpatchServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SpatchServer; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A9363E91C49260200E304D3 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = SOURCE_ROOT; };
 		7A9363EB1C4926A600E304D3 /* libssh.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.dylib; path = ../../../../../../usr/local/Cellar/libssh/0.7.1/lib/libssh.dylib; sourceTree = "<group>"; };
-		7A9363F31C49542100E304D3 /* SPTServerTTYExample.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SPTServerTTYExample.c; sourceTree = "<group>"; };
-		7A9363F51C495AD700E304D3 /* SPTServerExample.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SPTServerExample.c; sourceTree = "<group>"; };
 		7A9363F71C4A4E2100E304D3 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -76,13 +77,13 @@
 				7A9363E91C49260200E304D3 /* Makefile */,
 				7A7BB7681C4C443F00187763 /* SPTServGuest.cpp */,
 				7A7BB7691C4C443F00187763 /* SPTServGuest.hpp */,
-				7A9363F31C49542100E304D3 /* SPTServerTTYExample.c */,
-				7A9363F51C495AD700E304D3 /* SPTServerExample.c */,
 				7A9363F71C4A4E2100E304D3 /* main.cpp */,
 				7A5DDF5F1C4C0D3700A81DBB /* SPTServ.cpp */,
 				7A5DDF601C4C0D3700A81DBB /* SPTServ.hpp */,
 				7A23F2461C50160600971AB8 /* SPTServGuestTalk.cpp */,
 				7A23F2471C50160600971AB8 /* SPTServGuestTalk.hpp */,
+				7A7E966C1C5A4655001772E5 /* SPTHostConnection.cpp */,
+				7A7E966D1C5A4655001772E5 /* SPTHostConnection.hpp */,
 			);
 			path = SpatchServer;
 			sourceTree = "<group>";
@@ -144,6 +145,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A7E966E1C5A4655001772E5 /* SPTHostConnection.cpp in Sources */,
 				7A23F2481C50160600971AB8 /* SPTServGuestTalk.cpp in Sources */,
 				7A9363F81C4A4E2100E304D3 /* main.cpp in Sources */,
 				7A5DDF611C4C0D3700A81DBB /* SPTServ.cpp in Sources */,

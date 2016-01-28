@@ -38,6 +38,7 @@ SPTServ::~SPTServ(){
 
 int SPTServ::_initServ(){
     
+    int vbool = 1;
     ssh_bind_options_set(_bind,
                          SSH_BIND_OPTIONS_DSAKEY,
                          (std::string(_sshHostKeysPath)+std::string("ssh_host_dsa_key")).c_str());
@@ -47,6 +48,8 @@ int SPTServ::_initServ(){
     ssh_bind_options_set(_bind,
                          SSH_BIND_OPTIONS_BINDPORT_STR,
                          _port);
+    int ret = ssh_options_set(_session, SSH_OPTIONS_SSH2, &vbool);
+    
     if(ssh_bind_listen(_bind)<0){
         std::cerr << "Error listening to socket: " << ssh_get_error(_bind) << std::endl;
         return -1;

@@ -15,6 +15,7 @@
 #include <libssh/libssh.h>
 #include <libssh/callbacks.h>
 #include <poll.h>
+#include <errno.h>
 
 SPTServGuest::SPTServGuest(const ssh_session session):
 _channel(NULL),
@@ -184,241 +185,250 @@ void getClientIp(ssh_session session, std::string & host, int & port) {
     host = ip_str;
 }
 
-//static int copy_fd_to_chan(socket_t fd, int revents, void *userdata) {
-//    ssh_channel chan = (ssh_channel)userdata;
-//    char buf[2048];
-//    int sz = 0;
-//    
-//    if(!chan) {
-//        close(fd);
-//        return -1;
-//    }
-//    if(revents & POLLIN) {
-//        sz = read(fd, buf, 2048);
-//        if(sz > 0) {
-//            ssh_channel_write(chan, buf, sz);
-//        }
-//    }
-//    if(revents & POLLHUP) {
-//        ssh_channel_close(chan);
-//        sz = -1;
-//    }
-//    return sz;
-//}
-//
-//static int copy_chan_to_fd(ssh_session session,
-//                           ssh_channel channel,
-//                           void *data,
-//                           uint32_t len,
-//                           int is_stderr,
-//                           void *userdata) {
-//    int fd = *(int*)userdata;
-//    int sz;
-//    (void)session;
-//    (void)channel;
-//    (void)is_stderr;
-//    
-//    sz = write(fd, data, len);
-//    return sz;
-//}
-//
-//static void chan_close(ssh_session session, ssh_channel channel, void *userdata) {
-//    int fd = *(int*)userdata;
-//    (void)session;
-//    (void)channel;
-//    
-//    close(fd);
-//}
-//
-//
-//
-//struct ssh_channel_callbacks_struct cb = {
-//    .channel_data_function = copy_chan_to_fd,
-//    .channel_eof_function = chan_close,
-//    .channel_close_function = chan_close,
-//    .userdata = NULL
-//};
+int verify_knownhost(ssh_session session){
+    char *hexa;
+    int state;
+    char buf[10];
+    unsigned char *hash = NULL;
+    size_t hlen;
+    int rc;
+    
+    state=ssh_is_server_known(session);
+    
+    std::cout << "ssh_is_server_known : " << state  << std::endl;
+    
 
-//int doSelect(ssh_session session, const ssh_channel forwardingChannel){
+    ssh_key srv_pubkey;
+    
+    rc = ssh_get_publickey(session, &srv_pubkey);
+    if (rc < 0){
+        return -1;
+    }
+    
+    rc = ssh_get_publickey_hash(srv_pubkey,
+                           SSH_PUBLICKEY_HASH_SHA1,
+                           &hash,
+                           &hlen);
+    if (srv_pubkey != NULL){
+        ssh_key_free(srv_pubkey);
+    }
+    if (rc < 0) {
+        std::cout << "ssh_get_publickey_hash failure" << rc << std::endl;
+        return -1;
+    }else{
+        std::cout << "ssh_get_publickey_hash succeded" << std::endl;
+    }
+    switch(state){
+        case SSH_SERVER_KNOWN_OK:
+            break; /* ok */
+        case SSH_SERVER_KNOWN_CHANGED:
+            fprintf(stderr,"Host key for server changed : server's one is now :\n");
+            ssh_print_hexa("Public key hash",hash, hlen);
+            ssh_clean_pubkey_hash(&hash);
+            fprintf(stderr,"For security reason, connection will be stopped\n");
+            return -1;
+        case SSH_SERVER_FOUND_OTHER:
+            fprintf(stderr,"The host key for this server was not found but an other type of key exists.\n");
+            fprintf(stderr,"An attacker might change the default server key to confuse your client"
+                    "into thinking the key does not exist\n"
+                    "We advise you to rerun the client with -d or -r for more safety.\n");
+            return -1;
+        case SSH_SERVER_FILE_NOT_FOUND:
+            fprintf(stderr,"Could not find known host file. If you accept the host key here,\n");
+            fprintf(stderr,"the file will be automatically created.\n");
+            /* fallback to SSH_SERVER_NOT_KNOWN behavior */
+        case SSH_SERVER_NOT_KNOWN:
+            hexa = ssh_get_hexa(hash, hlen);
+            fprintf(stderr,"The server is unknown. Do you trust the host key ?\n");
+            fprintf(stderr, "Public key hash: %s\n", hexa);
+            ssh_string_free_char(hexa);
+            if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                ssh_clean_pubkey_hash(&hash);
+                return -1;
+            }
+            if(strncasecmp(buf,"yes",3)!=0){
+                ssh_clean_pubkey_hash(&hash);
+                return -1;
+            }
+            fprintf(stderr,"This new key will be written on disk for further usage. do you agree ?\n");
+            if (fgets(buf, sizeof(buf), stdin) == NULL) {
+                ssh_clean_pubkey_hash(&hash);
+                return -1;
+            }
+            if(strncasecmp(buf,"yes",3)==0){
+                if (ssh_write_knownhost(session) < 0) {
+                    ssh_clean_pubkey_hash(&hash);
+                    std::cerr << "error " << strerror(errno) << std::endl;
+                    return -1;
+                }
+            }
+            
+            break;
+        case SSH_SERVER_ERROR:
+            ssh_clean_pubkey_hash(&hash);
+            fprintf(stderr,"%s",ssh_get_error(session));
+            return -1;
+    }
+    ssh_clean_pubkey_hash(&hash);
+    
+    return 0;
+}
+
+//int interactive_shell_session(ssh_session session, ssh_channel channel)
+//{
 //    char buffer[256];
 //    int nbytes, nwritten;
-//    std::cout << "ssh_channel_is_closed : " << ssh_channel_is_closed(forwardingChannel) << std::endl;
-//    std::cout << "ssh_channel_is_open : " << ssh_channel_is_open(forwardingChannel) << std::endl;
-//    std::cout << "ssh_channel_is_eof : " << ssh_channel_is_eof(forwardingChannel) << std::endl;
-//    while (ssh_channel_is_open(forwardingChannel) &&
-//           !ssh_channel_is_eof(forwardingChannel))
+//    while (ssh_channel_is_open(channel) &&
+//           !ssh_channel_is_eof(channel))
 //    {
-//        std::cout << "doSelect while" << std::endl;
 //        struct timeval timeout;
 //        ssh_channel in_channels[2], out_channels[2];
 //        fd_set fds;
 //        int maxfd;
 //        timeout.tv_sec = 30;
 //        timeout.tv_usec = 0;
-//        in_channels[0] = forwardingChannel;
+//        in_channels[0] = channel;
 //        in_channels[1] = NULL;
 //        FD_ZERO(&fds);
+//        FD_SET(0, &fds);
 //        FD_SET(ssh_get_fd(session), &fds);
 //        maxfd = ssh_get_fd(session) + 1;
 //        ssh_select(in_channels, out_channels, maxfd, &fds, &timeout);
 //        if (out_channels[0] != NULL)
 //        {
-//            nbytes = ssh_channel_read(forwardingChannel, buffer, sizeof(buffer), 0);
-//            if (nbytes < 0) return -1;
+//            nbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0);
+//            if (nbytes < 0) return SSH_ERROR;
 //            if (nbytes > 0)
 //            {
-//                nwritten = ssh_channel_write(forwardingChannel, buffer, nbytes);
-//                if (nbytes != nwritten) return -1;
+//                nwritten = write(1, buffer, nbytes);
+//                if (nwritten != nbytes) return SSH_ERROR;
+//            }
+//        }
+//        if (FD_ISSET(0, &fds))
+//        {
+//            nbytes = read(0, buffer, sizeof(buffer));
+//            if (nbytes < 0) return SSH_ERROR;
+//            if (nbytes > 0)
+//            {
+//                nwritten = ssh_channel_write(channel, buffer, nbytes);
+//                if (nbytes != nwritten) return SSH_ERROR;
 //            }
 //        }
 //    }
-//    
-//    std::cout << "doSelect end" << std::endl;
-//    
-//    return 0;
+//    return rc;
 //}
 
-//int direct_forwarding(ssh_session session, ssh_channel guest_channel, const char * host, int port)
-//{
-//    ssh_channel forwarding_channel;
-//    int rc;
-//    std::string http_get = std::string("GET / HTTP/1.1\nHost: www.google.com\n\n");
-//    int nbytes, nwritten;
-//    forwarding_channel = ssh_channel_new(session);
-//    if (forwarding_channel == NULL) {
-//        return rc;
-//    }
-//    ssh_channel_set_blocking(forwarding_channel, 1);
-//    rc = ssh_channel_open_forward(forwarding_channel,
-//                                  "www.google.com", 80,
-//                                  host, port);
-//    if (rc != SSH_OK)
-//    {
-//        ssh_channel_free(forwarding_channel);
-//        return rc;
-//    }
-//    std::cout << "coucou0" << std::endl;
-//    nbytes = strlen(http_get.c_str());
-//    nwritten = ssh_channel_write(forwarding_channel,
-//                                 http_get.c_str(),
-//                                 nbytes);
-//    std::cout << "nbytes(" << nbytes << ")" << std::endl;
-//    std::cout << "nwritten(" << nwritten << ")" << std::endl;
-//    if (nbytes != nwritten)
-//    {
-//        std::cout << "coucou-1" << std::endl;
-//        ssh_channel_free(forwarding_channel);
-//        return SSH_ERROR;
-//    }else{
-//        std::cout << "coucou1" << std::endl;
-//    }
-//    
-//    ssh_channel_free(forwarding_channel);
-//    return SSH_OK;
-//}
 
-int direct_forwarding(ssh_session session, const char * host)
-{
-    ssh_channel forwarding_channel;
+int callServer(const ssh_channel clientChannel, const char * guestIp, int guestPort){
+    
+    ssh_session my_ssh_session;
+    ssh_channel my_ssh_channel;
+    ssh_channel my_ssh_channel2;
     int rc;
-    std::string http_get = std::string("GET / HTTP/1.1\nHost: www.google.com\n\n");
-    int nbytes, nwritten;
-    forwarding_channel = ssh_channel_new(session);
-    if (forwarding_channel == NULL) {
-        return rc;
-    }
-    rc = ssh_channel_open_forward(forwarding_channel,
-                                  "www.google.com", 80,
-                                  "localhost", 5555);
-    int opened = ssh_channel_is_open(forwarding_channel);
-    if (opened == 1){
-        std::cout << "channel opened" << std::endl;;
+    char *password;
+    // Open session and set options
+    my_ssh_session = ssh_new();
+    if (my_ssh_session == NULL){
+        std::cout << "session NULL" << std::endl;
+        return -1;
     }else{
-        std::cout << "channel not opened" << std::endl;;
+        std::cout << "SESSION OK" << std::endl;
+    }
+    ssh_options_set(my_ssh_session, SSH_OPTIONS_HOST, "192.168.1.229");
+    ssh_options_set(my_ssh_session, SSH_OPTIONS_PORT_STR, "22");
+    if (ssh_connect(my_ssh_session) < 0){
+        std::cout << ssh_get_error(my_ssh_session) << std::endl;
+        return -1;
+    }else{
+        std::cout << "SSH_CONNECT OK" << std::endl;
+    }
+    if (ssh_userauth_password(my_ssh_session, "vagrant", "vagrant") < 0){
+        std::cout << ssh_get_error(my_ssh_session) << std::endl;
+        return -1;
+    }else{
+        std::cout << "ssh_userauth_password OK" << std::endl;
     }
     
-    if (rc != SSH_OK)
-    {
-        ssh_channel_free(forwarding_channel);
-        return rc;
-    }
-    nbytes = strlen(http_get.c_str());
-    nwritten = ssh_channel_write(forwarding_channel,
-                                 http_get.c_str(),
-                                 nbytes);
-    if (nbytes != nwritten)
-    {
-        ssh_channel_free(forwarding_channel);
-        return SSH_ERROR;
-    }
+    ssh_channel_open_session(my_ssh_channel);
+    
 
     
-    ssh_channel_free(forwarding_channel);
-    return SSH_OK;
-}
-
-//int direct_forwarding(ssh_session session, const char * host, int port)
-//{
-//    ssh_channel forwarding_channel;
-//    //ssh_event event;
-//    //short events;
-//    int rc;
-////    socket_t fd;
-//    
-//    forwarding_channel = ssh_channel_new(session);
-//    if (forwarding_channel == NULL) {
-//        return rc;
-//    }
-//    
-//    ssh_channel_set_blocking(forwarding_channel, 1);
-//    rc = ssh_channel_open_forward(forwarding_channel,
-//                                  "192.168.1.230", 22,
-//                                  host, 23);
-//    
-//    std::cout << "ssh_channel_open_forward status : " << rc << std::endl;
-//    if (rc != SSH_OK)
+    my_ssh_channel = ssh_channel_new(my_ssh_session);
+    if (ssh_channel_open_forward(my_ssh_channel,
+                                 "192.168.1.229", 22,
+                                 "localhost", 5555) < 0){
+        std::cout << ssh_get_error(my_ssh_session) << std::endl;
+        return -1;
+    }else{
+        std::cout << "ssh_channel_open_forward OK" << std::endl;
+    }
+    
+    std::cout << "open ? : " << ssh_channel_is_open(my_ssh_channel) << std::endl;
+    
+    my_ssh_channel2 = ssh_channel_new(my_ssh_session);
+    std::cout << "my_ssh_channel : " << my_ssh_channel << std::endl;
+    
+        if (ssh_channel_open_reverse_forward(my_ssh_channel2,
+                                      "localhost", 5555,
+                                     guestIp, guestPort) < 0){
+            std::cout << ssh_get_error(my_ssh_session) << std::endl;
+            return -1;
+        }else{
+            std::cout << "ssh_channel_open_reverse_forward OK" << std::endl;
+        }
+    
+    std::cout << "open ? : " << ssh_channel_is_open(my_ssh_channel2) << std::endl;
+    
+//    while (ssh_channel_is_open(my_ssh_channel) &&
+//           !ssh_channel_is_eof(my_ssh_channel))
 //    {
-//        ssh_channel_free(forwarding_channel);
-//        return rc;
-//    }else{
-//        std::cout << "Did forward the connection" << std::endl;
-//    }
-//
-//    
-//    std::cout << "ssh_channel_is_open : " << ssh_channel_is_open(forwarding_channel) << std::endl;
-//    
-//    cb.userdata = &fd;
-//    ssh_callbacks_init(&cb);
-//    ssh_set_channel_callbacks(forwarding_channel, &cb);
-//    
-//    events = POLLIN | POLLPRI | POLLERR | POLLHUP | POLLNVAL;
-//    
-//    event = ssh_event_new();
-//    if(event == NULL) {
-//        printf("Couldn't get a event\n");
-//        return -1;
-//    }
-//    if(ssh_event_add_fd(event, fd, events, copy_fd_to_chan, forwarding_channel) != SSH_OK) {
-//        printf("Couldn't add an fd to the event\n");
-//        return -1;
-//    }
-//    if(ssh_event_add_session(event, session) != SSH_OK) {
-//        printf("Couldn't add the session to the event\n");
-//        return -1;
+//        int read = 1;
+//        char buff[2048];
+//        std::cout << "read now" << std::endl;
+//        while (read){
+//            memset(buff, 0, 2048);
+//            int nbytes;
+//            nbytes = ssh_channel_read(my_ssh_channel, buff, sizeof(buff) - 1, 0);
+//            if (nbytes < 0)
+//                return SSH_ERROR;
+//            if (nbytes > 0)
+//                ssh_channel_write(clientChannel, buff, nbytes);
+//            if (nbytes < sizeof(buff) - 1){
+//                read = 0;
+//            }
+//        }
+//        
+//        int write = 1;
+//        std::cout << "write now" << std::endl;
+//        
+//        std::string guestStr = "";
+//        
+//        while (write){
+//            memset(buff, 0, 2048);
+//            int nbytes;
+//            nbytes = ssh_channel_read(clientChannel, buff, sizeof(buff) - 1, 0);
+//            if (nbytes < 0)
+//                return SSH_ERROR;
+//            if (buff[0] != '\r'){
+//                ssh_channel_write(clientChannel, &buff[0], 1);
+//                std::cout << "Append with : " << buff << std::endl;
+//                guestStr = guestStr + std::string(buff);
+//            }else{
+//                ssh_channel_write(clientChannel, "\n\r", 2);
+//                std::cout << "End with : " << buff << std::endl;
+//                guestStr = guestStr + std::string("\n\r");
+//                write = 0;
+//            }
+//            std::cout << guestStr << std::endl;
+//        }
+//        ssh_channel_write(my_ssh_channel, guestStr.c_str(), guestStr.length());
 //    }
     
-//    do {
-//        ssh_event_dopoll(event, 1000);
-//    } while(!ssh_channel_is_closed(forwarding_channel));
-//    
-//    if (doSelect(session, forwarding_channel) < 0){
-//        ssh_channel_free(forwarding_channel);
-//        return -1;
-//    }
-    
-//    ssh_channel_free(forwarding_channel);
-//    return SSH_OK;
-//}
+    ssh_channel_free(my_ssh_channel);
+    ssh_disconnect(my_ssh_session);
+    ssh_free(my_ssh_session);
+    return 0;
+}
 
 
 int SPTServGuest::start(){
@@ -438,9 +448,7 @@ int SPTServGuest::start(){
     
     std::cout << host << " " << port << std::endl;
     
-    //web_server(_session);
+    callServer(_channel, host.c_str(), port);
     
-    //direct_forwarding(_session, host.c_str(), port);
-    direct_forwarding(_session, host.c_str());
     return 0;
 }

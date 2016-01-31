@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7A23F2481C50160600971AB8 /* SPTServGuestTalk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A23F2461C50160600971AB8 /* SPTServGuestTalk.cpp */; };
+		7A3800891C5E6CA400C7DA26 /* SPTTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A3800871C5E6CA400C7DA26 /* SPTTools.cpp */; };
 		7A5DDF611C4C0D3700A81DBB /* SPTServ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A5DDF5F1C4C0D3700A81DBB /* SPTServ.cpp */; };
 		7A7BB76A1C4C443F00187763 /* SPTServGuest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A7BB7681C4C443F00187763 /* SPTServGuest.cpp */; };
 		7A7E966E1C5A4655001772E5 /* SPTHostConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A7E966C1C5A4655001772E5 /* SPTHostConnection.cpp */; };
@@ -30,6 +31,8 @@
 /* Begin PBXFileReference section */
 		7A23F2461C50160600971AB8 /* SPTServGuestTalk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SPTServGuestTalk.cpp; sourceTree = "<group>"; };
 		7A23F2471C50160600971AB8 /* SPTServGuestTalk.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SPTServGuestTalk.hpp; sourceTree = "<group>"; };
+		7A3800871C5E6CA400C7DA26 /* SPTTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SPTTools.cpp; sourceTree = "<group>"; };
+		7A3800881C5E6CA400C7DA26 /* SPTTools.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SPTTools.hpp; sourceTree = "<group>"; };
 		7A5DDF5F1C4C0D3700A81DBB /* SPTServ.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SPTServ.cpp; sourceTree = "<group>"; };
 		7A5DDF601C4C0D3700A81DBB /* SPTServ.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SPTServ.hpp; sourceTree = "<group>"; };
 		7A7BB7681C4C443F00187763 /* SPTServGuest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SPTServGuest.cpp; sourceTree = "<group>"; };
@@ -84,6 +87,8 @@
 				7A23F2471C50160600971AB8 /* SPTServGuestTalk.hpp */,
 				7A7E966C1C5A4655001772E5 /* SPTHostConnection.cpp */,
 				7A7E966D1C5A4655001772E5 /* SPTHostConnection.hpp */,
+				7A3800871C5E6CA400C7DA26 /* SPTTools.cpp */,
+				7A3800881C5E6CA400C7DA26 /* SPTTools.hpp */,
 			);
 			path = SpatchServer;
 			sourceTree = "<group>";
@@ -150,6 +155,7 @@
 				7A9363F81C4A4E2100E304D3 /* main.cpp in Sources */,
 				7A5DDF611C4C0D3700A81DBB /* SPTServ.cpp in Sources */,
 				7A7BB76A1C4C443F00187763 /* SPTServGuest.cpp in Sources */,
+				7A3800891C5E6CA400C7DA26 /* SPTTools.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

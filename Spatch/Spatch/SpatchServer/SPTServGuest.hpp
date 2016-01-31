@@ -25,9 +25,6 @@ private:
     const ssh_session   _session;
     ssh_channel         _channel;
     int                 _initConnection();
-    int                 _waitChannel();
-    int                 _waitShell();
-    int                 _authUser();
     SPTServGuestTalk    _guestTalk;
     
 };

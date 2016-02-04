@@ -1,24 +1,24 @@
 //
-//  SPTServ.cpp
+//  SPTMain.cpp
 //  SpatchServer
 //
 //  Created by adrienl on 17/01/2016.
 //  Copyright © 2016 adrienlouf. All rights reserved.
 //
 
-#include "SPTServ.hpp"
-#include "SPTServGuest.hpp"
+#include "SPTMain.hpp"
+#include "SPTBinder.hpp"
 #include <iostream>
 #include <string>
 
-SPTServ::SPTServ(const char * host, const char * port, const char * sshHostKeysPath):
+SPTMain::SPTMain(const char * host, const char * port, const char * sshHostKeysPath):
     _session(ssh_new()),
     _bind(ssh_bind_new()),
     _port(port),
     _host(host),
     _sshHostKeysPath(sshHostKeysPath){}
 
-SPTServ::~SPTServ(){
+SPTMain::~SPTMain(){
     
     ssh_disconnect(_session);
     
@@ -36,7 +36,7 @@ SPTServ::~SPTServ(){
     ssh_finalize();
 }
 
-int SPTServ::_initServ(){
+int SPTMain::_initServ(){
     
     int vbool = 1;
     ssh_bind_options_set(_bind,
@@ -48,7 +48,7 @@ int SPTServ::_initServ(){
     ssh_bind_options_set(_bind,
                          SSH_BIND_OPTIONS_BINDPORT_STR,
                          _port);
-    int ret = ssh_options_set(_session, SSH_OPTIONS_SSH2, &vbool);
+    ssh_options_set(_session, SSH_OPTIONS_SSH2, &vbool);
     
     if(ssh_bind_listen(_bind)<0){
         std::cerr << "Error listening to socket: " << ssh_get_error(_bind) << std::endl;
@@ -57,11 +57,11 @@ int SPTServ::_initServ(){
     return 0;
 }
 
-int SPTServ::_forkServ(){
+int SPTMain::_forkServ(){
     int pid = fork();
     
     if(pid == 0){
-        SPTServGuest servGuest = SPTServGuest(_session);
+        SPTBinder servGuest = SPTBinder(_session);
         if (servGuest.start() < 0){
             return -1;
         }
@@ -73,7 +73,7 @@ int SPTServ::_forkServ(){
 //    return 0;
 }
 
-int SPTServ::start(){
+int SPTMain::start(){
     if (this->_initServ() < 0){
         return -1;
     }

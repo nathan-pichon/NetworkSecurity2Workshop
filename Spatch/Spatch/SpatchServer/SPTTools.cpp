@@ -9,6 +9,7 @@
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 #include <iostream>
+#include <sstream>
 #include <arpa/inet.h>
 #include <string.h>
 #include <sys/errno.h>
@@ -149,6 +150,34 @@ int SPTTools::waitShell(ssh_session session){
     return 0;
 }
 
+int SPTTools::requestSheelSession(ssh_channel channel, int width, int height)
+{
+    int rc;
+    rc = ssh_channel_request_pty(channel);
+    if (rc != SSH_OK) return rc;
+    rc = ssh_channel_change_pty_size(channel, width, height);
+    if (rc != SSH_OK) return rc;
+    rc = ssh_channel_request_shell(channel);
+    if (rc != SSH_OK) return rc;
+    return rc;
+}
+
+ssh_channel SPTTools::newChannel(ssh_session session){
+    ssh_channel channel = ssh_channel_new(session);
+    if (channel == NULL){
+        std::cerr << "SPTTools::newChannel : failed to instanciate channel" << std::endl;
+        return NULL;
+    }
+    int rc = ssh_channel_open_session(channel);
+    if (rc != SSH_OK)
+    {
+        std::cerr << "SPTTools::newChannel : " << ssh_get_error(session) << std::endl;
+        ssh_channel_free(channel);
+        return NULL;
+    }
+    return channel;
+}
+
 int SPTTools::verify_knownhost(ssh_session session){
     char *hexa;
     int state;
@@ -235,5 +264,42 @@ int SPTTools::verify_knownhost(ssh_session session){
     }
     ssh_clean_pubkey_hash(&hash);
     
+    return 0;
+}
+
+int SPTTools::interactive_shell_session(ssh_session clientSession, ssh_channel clientChannel, ssh_session serverSession, ssh_channel serverChannel)
+{
+    char buffer[4096];
+    int nbytes, nwritten;
+    while (1){
+        if (ssh_channel_is_closed(serverChannel) || ssh_channel_is_eof(serverChannel)){
+            std::cout << "server closed " << ssh_channel_close(serverChannel) << std::endl;
+            ssh_channel_close(clientChannel);
+            break;
+        }
+        if (ssh_channel_is_closed(clientChannel) || ssh_channel_is_eof(serverChannel)){
+            std::cout << "client closed " << ssh_channel_close(clientChannel) << std::endl;
+            ssh_channel_close(serverChannel);
+            break;
+        }
+        if (ssh_channel_poll(clientChannel, 0) > 0){
+            nbytes = ssh_channel_read(clientChannel, buffer, 4096, 0);
+            if (nbytes > 0)
+            {
+                nwritten = ssh_channel_write(serverChannel, buffer, nbytes);
+                if (nbytes != nwritten) return SSH_ERROR;
+            }
+        }
+        if (ssh_channel_poll(serverChannel, 0) > 0){
+            nbytes = ssh_channel_read(serverChannel, buffer, 4096, 0);
+            if (nbytes > 0)
+            {
+                nwritten = ssh_channel_write(clientChannel, buffer, nbytes);
+                if (nbytes != nwritten) return SSH_ERROR;
+            }
+
+        }
+        usleep(10000);
+    }
     return 0;
 }

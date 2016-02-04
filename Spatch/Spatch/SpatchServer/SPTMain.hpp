@@ -1,22 +1,22 @@
 //
-//  SPTServ.hpp
+//  SPTMain.hpp
 //  SpatchServer
 //
 //  Created by adrienl on 17/01/2016.
 //  Copyright © 2016 adrienlouf. All rights reserved.
 //
 
-#ifndef SPTServ_hpp
-#define SPTServ_hpp
+#ifndef SPTMain_hpp
+#define SPTMain_hpp
 
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 
-class SPTServ{
+class SPTMain{
 
 public:
-    SPTServ(const char * host, const char * port, const char * sshHostKeysPath);
-    ~SPTServ();
+    SPTMain(const char * host, const char * port, const char * sshHostKeysPath);
+    ~SPTMain();
     int start();
     
 private:
@@ -35,4 +35,4 @@ private:
     int            _manageGuest();
 };
 
-#endif /* SPTServ_hpp */
+#endif /* SPTMain_hpp */

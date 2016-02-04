@@ -1,5 +1,5 @@
 
-#include "SPTServ.hpp"
+#include "SPTMain.hpp"
 
 #define DEFAULT_PORT "23"
 #define DEFAULT_HOST "localhost"
@@ -7,7 +7,7 @@
 
 int main(int argc, char * argv[]){
     
-    SPTServ serv = SPTServ(DEFAULT_HOST, DEFAULT_PORT, SSH_HOST_KEYS_PATH);
+    SPTMain serv = SPTMain(DEFAULT_HOST, DEFAULT_PORT, SSH_HOST_KEYS_PATH);
     
     if (serv.start() < 0){
         return -1;

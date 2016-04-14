@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		618ACA7D1C47AB0000CD49D6 /* SPTServerAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 618ACA7B1C47AB0000CD49D6 /* SPTServerAuthentication.cpp */; };
+		61A4F1CF1C47E7DB00D8F14F /* libpam.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 61A4F1CE1C47E7DB00D8F14F /* libpam.dylib */; };
+		7A43EEEB1C46E0110010A453 /* testclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A43EEE91C46E0110010A453 /* testclient.cpp */; };
+		7A6F6B801C47954C002225FB /* SPTServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A6F6B7E1C47954C002225FB /* SPTServer.cpp */; };
+		7A6F6B821C47A0C7002225FB /* testserver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A6F6B811C47A0C7002225FB /* testserver.cpp */; };
 		7AD163991C45C814009DA7BA /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7AD163981C45C814009DA7BA /* main.cpp */; };
 		7AD163A01C45C91E009DA7BA /* libssh.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD1639F1C45C91E009DA7BA /* libssh.dylib */; };
 /* End PBXBuildFile section */
@@ -24,6 +29,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		618ACA7B1C47AB0000CD49D6 /* SPTServerAuthentication.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SPTServerAuthentication.cpp; sourceTree = "<group>"; };
+		618ACA7C1C47AB0000CD49D6 /* SPTServerAuthentication.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SPTServerAuthentication.hpp; sourceTree = "<group>"; };
+		61A4F1CE1C47E7DB00D8F14F /* libpam.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpam.dylib; path = ../../../../../usr/lib/libpam.dylib; sourceTree = "<group>"; };
+		7A43EEE91C46E0110010A453 /* testclient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testclient.cpp; sourceTree = "<group>"; };
+		7A6F6B7E1C47954C002225FB /* SPTServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SPTServer.cpp; sourceTree = "<group>"; };
+		7A6F6B7F1C47954C002225FB /* SPTServer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SPTServer.hpp; sourceTree = "<group>"; };
+		7A6F6B811C47A0C7002225FB /* testserver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testserver.cpp; sourceTree = "<group>"; };
 		7AD163951C45C814009DA7BA /* Spatch */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Spatch; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AD163981C45C814009DA7BA /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		7AD1639F1C45C91E009DA7BA /* libssh.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.dylib; path = ../../../../../usr/local/Cellar/libssh/0.7.1/lib/libssh.dylib; sourceTree = "<group>"; };
@@ -35,6 +47,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7AD163A01C45C91E009DA7BA /* libssh.dylib in Frameworks */,
+				61A4F1CF1C47E7DB00D8F14F /* libpam.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,6 +58,7 @@
 			isa = PBXGroup;
 			children = (
 				7AD1639F1C45C91E009DA7BA /* libssh.dylib */,
+				61A4F1CE1C47E7DB00D8F14F /* libpam.dylib */,
 				7AD163971C45C814009DA7BA /* Spatch */,
 				7AD163961C45C814009DA7BA /* Products */,
 			);
@@ -61,7 +75,13 @@
 		7AD163971C45C814009DA7BA /* Spatch */ = {
 			isa = PBXGroup;
 			children = (
+				7A6F6B811C47A0C7002225FB /* testserver.cpp */,
+				7A43EEE91C46E0110010A453 /* testclient.cpp */,
 				7AD163981C45C814009DA7BA /* main.cpp */,
+				7A6F6B7E1C47954C002225FB /* SPTServer.cpp */,
+				7A6F6B7F1C47954C002225FB /* SPTServer.hpp */,
+				618ACA7B1C47AB0000CD49D6 /* SPTServerAuthentication.cpp */,
+				618ACA7C1C47AB0000CD49D6 /* SPTServerAuthentication.hpp */,
 			);
 			path = Spatch;
 			sourceTree = "<group>";
@@ -92,6 +112,7 @@
 		7AD1638D1C45C814009DA7BA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = SPT;
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = adrienlouf;
 				TargetAttributes = {
@@ -122,6 +143,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A6F6B801C47954C002225FB /* SPTServer.cpp in Sources */,
+				7A43EEEB1C46E0110010A453 /* testclient.cpp in Sources */,
+				7A6F6B821C47A0C7002225FB /* testserver.cpp in Sources */,
+				618ACA7D1C47AB0000CD49D6 /* SPTServerAuthentication.cpp in Sources */,
 				7AD163991C45C814009DA7BA /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -211,7 +236,10 @@
 		7AD1639D1C45C814009DA7BA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = /usr/local/Cellar/libssh/0.7.1/include;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/libssh/0.7.1/include,
+					/usr/include,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/libssh/0.7.1/lib,
@@ -223,7 +251,10 @@
 		7AD1639E1C45C814009DA7BA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = /usr/local/Cellar/libssh/0.7.1/include;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/libssh/0.7.1/include,
+					/usr/include,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/libssh/0.7.1/lib,
@@ -251,6 +282,7 @@
 				7AD1639E1C45C814009DA7BA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

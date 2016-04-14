@@ -2,169 +2,112 @@
 //  main.cpp
 //  Spatch
 //
-//  Created by adrienl on 12/01/2016.
+//  Created by adrienl on 14/01/2016.
 //  Copyright © 2016 adrienlouf. All rights reserved.
 //
 
-#include <iostream>
 #include <libssh/libssh.h>
+#include "SPTServer.hpp"
 
-int show_remote_processes(ssh_session session)
-{
-    ssh_channel channel;
-    int rc;
-    char buffer[256];
-    int nbytes;
-    channel = ssh_channel_new(session);
-    if (channel == NULL)
-        return SSH_ERROR;
-    rc = ssh_channel_open_session(channel);
-    if (rc != SSH_OK)
-    {
-        ssh_channel_free(channel);
-        return rc;
-    }
-    rc = ssh_channel_request_exec(channel, "ps aux");
-    if (rc != SSH_OK)
-    {
-        ssh_channel_close(channel);
-        ssh_channel_free(channel);
-        return rc;
-    }
-    nbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0);
-    while (nbytes > 0)
-    {
-        if (write(1, buffer, nbytes) != (unsigned int) nbytes)
-        {
-            ssh_channel_close(channel);
-            ssh_channel_free(channel);
-            return SSH_ERROR;
-        }
-        nbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0);
-    }
-    
-    if (nbytes < 0)
-    {
-        ssh_channel_close(channel);
-        ssh_channel_free(channel);
-        return SSH_ERROR;
-    }
-    ssh_channel_send_eof(channel);
-    ssh_channel_close(channel);
-    ssh_channel_free(channel);
-    return SSH_OK;
-}
+#include <stdio.h>
+#include <security/pam_appl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <iostream>
 
-int verify_knownhost(ssh_session session)
-{
-    int state, hlen;
-    unsigned char *hash = NULL;
-    char *hexa;
-    char buf[10];
-    state = ssh_is_server_known(session);
-    hlen = ssh_get_pubkey_hash(session, &hash);
-    if (hlen < 0)
-        return -1;
-    switch (state)
-    {
-        case SSH_SERVER_KNOWN_OK:
-            break; /* ok */
-        case SSH_SERVER_KNOWN_CHANGED:
-            fprintf(stderr, "Host key for server changed: it is now:\n");
-            ssh_print_hexa("Public key hash", hash, hlen);
-            fprintf(stderr, "For security reasons, connection will be stopped\n");
-            free(hash);
-            return -1;
-        case SSH_SERVER_FOUND_OTHER:
-            fprintf(stderr, "The host key for this server was not found but an other"
-                    "type of key exists.\n");
-            fprintf(stderr, "An attacker might change the default server key to"
-                    "confuse your client into thinking the key does not exist\n");
-            free(hash);
-            return -1;
-        case SSH_SERVER_FILE_NOT_FOUND:
-            fprintf(stderr, "Could not find known host file.\n");
-            fprintf(stderr, "If you accept the host key here, the file will be"
-                    "automatically created.\n");
-            /* fallback to SSH_SERVER_NOT_KNOWN behavior */
-        case SSH_SERVER_NOT_KNOWN:
-            hexa = ssh_get_hexa(hash, hlen);
-            fprintf(stderr,"The server is unknown. Do you trust the host key?\n");
-            fprintf(stderr, "Public key hash: %s\n", hexa);
-            free(hexa);
-            if (fgets(buf, sizeof(buf), stdin) == NULL)
-            {
-                free(hash);
-                return -1;
-            }
-            if (strncasecmp(buf, "yes", 3) != 0)
-            {
-                free(hash);
-                return -1;
-            }
-            if (ssh_write_knownhost(session) < 0)
-            {
-                fprintf(stderr, "Error %s\n", strerror(errno));
-                free(hash);
-                return -1;
-            }
-            break;
-        case SSH_SERVER_ERROR:
-            fprintf(stderr, "Error %s", ssh_get_error(session));
-            free(hash);
-            return -1;
-    }
-    free(hash);
-    return 0;
-}
+//struct pam_response *reply;
+//
+//// //function used to get user input
+//int function_conversation(int num_msg, const struct pam_message **msg, struct pam_response **resp, void *appdata_ptr)
+//{
+//    *resp = reply;
+//    return PAM_SUCCESS;
+//}
+//
+//int authenticate_system(const char *username, const char *password)
+//{
+//    const struct pam_conv local_conversation = { function_conversation, NULL };
+//    pam_handle_t *local_auth_handle = NULL; // this gets set by pam_start
+//    
+//    int retval;
+//    retval = pam_start("su", username, &local_conversation, &local_auth_handle);
+//    
+//    if (retval != PAM_SUCCESS)
+//    {
+//        printf("pam_start returned: %d\n ", retval);
+//        return 0;
+//    }
+//    
+//    reply = (struct pam_response *)malloc(sizeof(struct pam_response));
+//    
+//    reply[0].resp = strdup(password);
+//    reply[0].resp_retcode = 0;
+//    retval = pam_authenticate(local_auth_handle, 0);
+//    
+//    if (retval != PAM_SUCCESS)
+//    {
+//        if (retval == PAM_AUTH_ERR)
+//        {
+//            printf("Authentication failure.\n");
+//        }
+//        else
+//        {
+//            printf("pam_authenticate returned %d\n", retval);
+//        }
+//        return 0;
+//    }
+//    
+//    printf("Authenticated.\n");
+//    retval = pam_end(local_auth_handle, retval);
+//    
+//    if (retval != PAM_SUCCESS)
+//    {
+//        printf("pam_end returned\n");
+//        return 0;
+//    }
+//    
+//    return 1;
+//}
+//
+//int toto(int argc, char** argv)
+//{
+//    char* login;
+//    char* password;
+//    
+//    printf("Authentication module\n");
+//    
+//    if (argc != 3)
+//    {
+//        printf("Invalid count of arguments %d.\n", argc);
+//        printf("./authModule <username> <password>");
+//        return 1;
+//    }
+//    
+//    login = argv[1];
+//    password = argv[2];
+//    
+//    if (authenticate_system(login, password) == 1)
+//    {
+//        printf("Authenticate with %s - %s through system\n", login, password);
+//        return 0;
+//    }
+//    
+//    printf("Authentication failed!\n");
+//    return 1;
+//}
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char **argv){
     
-    int verbosity = SSH_LOG_PROTOCOL;
-    int port = 22;
-    int rc;
+    ssh_session session = ssh_new();
     
-    ssh_session my_ssh_session = ssh_new();
+    SPTServer server = SPTServer(session);
     
-    if (my_ssh_session == NULL)
-        exit(-1);
+    server.start();
     
-    ssh_options_set(my_ssh_session, SSH_OPTIONS_HOST, "vps212515.ovh.net");
-    ssh_options_set(my_ssh_session, SSH_OPTIONS_LOG_VERBOSITY, &verbosity);
-    ssh_options_set(my_ssh_session, SSH_OPTIONS_PORT, &port);
+    ssh_free(session);
     
-    rc = ssh_connect(my_ssh_session);
-    if (rc != SSH_OK)
-    {
-        fprintf(stderr, "Error connecting to localhost: %s\n",
-                ssh_get_error(my_ssh_session));
-        exit(-1);
-    }
-    
-    // Verify the server's identity
-    // For the source code of verify_knowhost(), check previous example
-    if (verify_knownhost(my_ssh_session) < 0)
-    {
-        ssh_disconnect(my_ssh_session);
-        ssh_free(my_ssh_session);
-        exit(-1);
-    }
-    
-    if (ssh_userauth_publickey_auto(my_ssh_session, "root", NULL) < 0){
-        ssh_disconnect(my_ssh_session);
-        ssh_free(my_ssh_session);
-        exit(-1);
-    }
-    
-    if (show_remote_processes(my_ssh_session) < 0)
-    {
-        ssh_disconnect(my_ssh_session);
-        ssh_free(my_ssh_session);
-        exit(-1);
-    }
-    
-    ssh_disconnect(my_ssh_session);
-    ssh_free(my_ssh_session);
+    std::cout << "SPATCH " << getpid() << " says : The End" << std::endl;
     
     return 0;
 }
